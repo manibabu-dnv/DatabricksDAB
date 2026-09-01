@@ -23,6 +23,25 @@ jobs:
       - name: Install Databricks CLI
         uses: databricks/setup-cli@main
 
+      - name: Check authentication variables
+        run: |
+          if [ -z "$DATABRICKS_HOST" ]; then
+            echo "ERROR: DATABRICKS_HOST is missing"
+            exit 1
+          fi
+
+          if [ -z "$DATABRICKS_CLIENT_ID" ]; then
+            echo "ERROR: DATABRICKS_CLIENT_ID is missing"
+            exit 1
+          fi
+
+          if [ -z "$DATABRICKS_CLIENT_SECRET" ]; then
+            echo "ERROR: DATABRICKS_CLIENT_SECRET is missing"
+            exit 1
+          fi
+
+          echo "All Databricks authentication variables are present."
+
       - name: Validate DAB bundle
         run: databricks bundle validate -t dev
 
