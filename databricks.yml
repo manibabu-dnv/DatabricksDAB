@@ -1,0 +1,72 @@
+# This is a Declarative Automation Bundle definition for DatabricksDAB.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+
+bundle:
+  name: DatabricksDAB
+  uuid: 966f2a8c-5c24-46d4-9344-2c83a570bec2
+
+include:
+  - resources/*.yml
+
+artifacts:
+  python_artifact:
+    type: whl
+    build: uv build --wheel
+
+# Variables used by the different deployment targets.
+variables:
+  catalog:
+    description: The catalog to use
+
+  schema:
+    description: The schema to use
+
+targets:
+
+  # =========================
+  # DEV ENVIRONMENT
+  # =========================
+  dev:
+    mode: development
+    default: true
+
+    workspace:
+      host: https://dbc-1ce24445-c3ef.cloud.databricks.com
+
+    variables:
+      catalog: workspace
+      schema: ${workspace.current_user.short_name}
+
+
+  # =========================
+  # TEST ENVIRONMENT
+  # =========================
+  test:
+    mode: development
+
+    workspace:
+      host: https://dbc-1ce24445-c3ef.cloud.databricks.com
+
+    variables:
+      catalog: workspace
+      schema: test
+
+
+  # =========================
+  # PROD ENVIRONMENT
+  # =========================
+  prod:
+    mode: production
+
+    workspace:
+      host: https://dbc-1ce24445-c3ef.cloud.databricks.com
+
+      root_path: /Workspace/Users/d.n.v.manibabu@gmail.com/.bundle/${bundle.name}/${bundle.target}
+
+    variables:
+      catalog: workspace
+      schema: prod
+
+    permissions:
+      - user_name: d.n.v.manibabu@gmail.com
+        level: CAN_MANAGE

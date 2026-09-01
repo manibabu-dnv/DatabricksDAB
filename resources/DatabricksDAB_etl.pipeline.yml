@@ -1,0 +1,16 @@
+resources:
+  pipelines:
+    DatabricksDAB_etl:
+      name: ${bundle.target}_DatabricksDAB_etl
+      catalog: ${var.catalog}
+      schema: ${var.schema}
+      serverless: true
+      root_path: "../src/DatabricksDAB_etl"
+
+      libraries:
+        - glob:
+            include: ../src/DatabricksDAB_etl/transformations/**
+
+      environment:
+        dependencies:
+          - --editable ${workspace.file_path}
