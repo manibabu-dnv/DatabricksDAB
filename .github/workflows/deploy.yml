@@ -36,6 +36,7 @@ jobs:
       - name: Validate bundle
         run: databricks bundle validate -t dev
 
+
   deploy-dev:
     name: Deploy DEV
     if: github.event_name == 'push'
@@ -80,10 +81,6 @@ jobs:
     name: Deploy PROD
     if: github.event_name == 'push'
     needs: deploy-test
-    runs-on: ubuntu-latest
-
-  environment:
-    name: prod
     runs-on: ubuntu-latest
 
     environment:
