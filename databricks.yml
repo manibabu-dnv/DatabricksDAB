@@ -57,16 +57,17 @@ targets:
   # =========================
   prod:
     mode: production
+
     workspace:
       host: https://dbc-1ce24445-c3ef.cloud.databricks.com
-      root_path: /Workspace/Users/d.n.v.manibabu@gmail.com/.bundle/${bundle.name}/${bundle.target}
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
 
     variables:
       catalog: workspace
       schema: prod
 
     permissions:
-      - user_name: d.n.v.manibabu@gmail.com
-        level: CAN_MANAGE
       - service_principal_name: 1e80303e-8590-4abe-921e-aad902fb3e51
+        level: CAN_MANAGE
+      - user_name: d.n.v.manibabu@gmail.com
         level: CAN_MANAGE
