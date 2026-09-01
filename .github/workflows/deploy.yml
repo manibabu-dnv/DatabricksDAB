@@ -6,15 +6,17 @@ on:
 permissions:
   contents: read
 
-jobs:
-  validate-and-deploy-dev:
-    runs-on: ubuntu-latest
+env:
+  DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+  DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+  DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+  DATABRICKS_AUTH_TYPE: oauth-m2m
 
-    env:
-      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-      DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
-      DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
-      DATABRICKS_AUTH_TYPE: oauth-m2m
+jobs:
+
+  validate:
+    name: Validate DAB
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -26,27 +28,65 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v6
 
-      - name: Check authentication variables
-        run: |
-          if [ -z "$DATABRICKS_HOST" ]; then
-            echo "ERROR: DATABRICKS_HOST is missing"
-            exit 1
-          fi
-
-          if [ -z "$DATABRICKS_CLIENT_ID" ]; then
-            echo "ERROR: DATABRICKS_CLIENT_ID is missing"
-            exit 1
-          fi
-
-          if [ -z "$DATABRICKS_CLIENT_SECRET" ]; then
-            echo "ERROR: DATABRICKS_CLIENT_SECRET is missing"
-            exit 1
-          fi
-
-          echo "All Databricks authentication variables are present."
-
-      - name: Validate DAB bundle
+      - name: Validate bundle
         run: databricks bundle validate -t dev
 
-      - name: Deploy DAB bundle to DEV
+
+  deploy-dev:
+    name: Deploy DEV
+    needs: validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Deploy to DEV
         run: databricks bundle deploy -t dev
+
+
+  deploy-test:
+    name: Deploy TEST
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Deploy to TEST
+        run: databricks bundle deploy -t test
+
+
+  deploy-prod:
+    name: Deploy PROD
+    needs: deploy-test
+    runs-on: ubuntu-latest
+
+    environment:
+      name: prod
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Deploy to PROD
+        run: databricks bundle deploy -t prod
